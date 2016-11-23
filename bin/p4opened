@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+ 
+clients    = Array.new
+client_arr = Array.new
+client     = nil
+stream     = nil
+user       = nil
+output     = nil
+ 
+  if ARGV.include?("-h")||ARGV.include?("-help") then
+    print "     \n"
+    print "   p4opened allows a user to view (all users) opened files of a given stream  \n"
+    print "   It will also show all clients associated with the given stream  \n"
+    print "   Note.  It does not return the status of imported files  \n"
+    print "     \n"
+    print "   Usage: p4opened //myproject/mystream  \n"
+    print "     \n"
+    exit
+  end
+ 
+  ##Capture the given stream from the command line
+  #
+  stream = ARGV[0]
+  # TODO Capture current stream if stream not set
+ 
+ 
+  #Capture all the Clients on this Stream
+  #
+  clients = `p4 clients -S #{stream}`.split("\n")
+ 
+  clients.each do |client_str|
+    client_arr = client_str.split(/[\s" "]/)
+    puts client = client_arr[1]
+    puts `p4 opened -C #{client}`
+  end

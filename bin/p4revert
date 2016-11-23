@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+  
+  if ARGV.include?("-h")||ARGV.include?("-help") then
+    print "     \n"
+    print "   p4revert allows a user to revert/backout a file from a COMMITED change  \n"
+    print "   Note.  p4revert will not commit the revert.  \n"
+    print "   Note.  The contents of the file will be reverted to the #rev given and be visible as opened & modified  \n"
+    print "     \n"
+    print "   Usage: p4revert -r #rev myfile  \n"
+    print "     \n"
+    exit
+  end
+ 
+ 
+##Find the comment ... if any
+#
+ARGV.each_with_index do|arg, i|
+    if (ARGV[i].eql?("-r"))
+      REV  = ARGV[i+1]
+      FILE = ARGV[i+2]
+    end
+end
+ 
+##Exit if the comment is not given
+#
+if (REV.nil?)
+  abort("Failed: Please add a revision number!")
+end
+ 
+`p4 sync #{FILE}"#"#{REV}`
+`p4 edit #{FILE}`
+`p4 sync #{FILE}`
+`p4 resolve -ay #{FILE}`

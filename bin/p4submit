@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+ 
+# c4submit -h
+  if ARGV.include?("-h")||ARGV.include?("-help") then
+    print "     \n"
+    print "   p4submit allows a user to submit multiple file on the command line without modifiying the default changelist  \n"
+    print "     \n"
+    print "   Usage: p4submit file1 file2 filen -d description  \n"
+    print "     \n"
+    exit
+  end
+ 
+##Find the DESCR ... if any
+#
+ARGV.each_with_index do|arg, i|
+    if (ARGV[i].eql?("-d"))
+      DESCR = ARGV[i+1]
+    end
+end
+ 
+##Exit if the DESCR is not given
+#
+if (DESCR.nil?)
+  abort("Submit Failed: Please add a DESCR!")
+end
+ 
+#Create a new changelist and add in the description
+#
+cmd = " p4 change -o | sed '/\\/\\//d' | sed 's/<enter description here\>/#{DESCR}/' | p4 change -i | cut -d \' \' -f 2 > /dev/null 2>&1 "
+system(cmd)
+ 
+#Extract the changelist number
+#
+changelist_str = `p4 changelists -u $USER -s pending`
+changelist     = changelist_str.to_s.split
+CHANGELIST_NO  = changelist[1].to_i
+ 
+# Reopen the files passed from the default changelist to the new
+#
+ARGV.each_with_index do|fname, i|
+  if(!(ARGV[i].eql?("-d") || ARGV[i-1].eql?("-d"))) then
+    puts "Submitting file : #{fname}"
+    `p4 reopen -c #{CHANGELIST_NO} #{fname}`
+  end
+end
+ 
+##Submit the new changelist with DESCR
+`p4 submit -c #{CHANGELIST_NO}`
