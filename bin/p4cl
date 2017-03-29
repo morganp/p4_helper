@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Get the current change list number from specified repo or current workspace
+# if not specified
+
+stream=$@
+
+#Check if command line option specified, otherwise get the workspace stream
+if [ "$stream" == '' ]; then
+  stream=`p4 -F %Stream% -ztag client -o`
+fi
+stream=`echo $stream | sed 's/trunk/main/'`
+if [[ "$stream" != */... ]]; then
+    stream="$stream/..."
+fi
+  
+num=`p4 changes -m 1 "$stream"#have | sed 's/Change \([0-9]*\) .*/\1/'` 
+
+# Report
+echo "$stream@$num"
