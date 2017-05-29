@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Get the latest change list number for imported streams
+# TODO the latest cange lists are older than the listed ones. they are very specific to the folder they are pointig to. may be should strip back to the stream branch ?
+stream_list=$(p4 -ztag stream -o `p4 -F %Stream% -ztag client -o` | grep -e "Paths[0-9]* import") # | awk '{ print $NF }'
+
+
+#echo "$a" | awk '{ print $NF }'
+# change delimiter (IFS) to new line.
+IFS_BAK=$IFS
+IFS=$'\n'
+for line in $stream_list; do
+  pinned_stream=$(echo $line | awk '{ print $NF }')
+  stream=`echo $pinned_stream | sed -E 's/@[0-9]+//'`
+  
+  latest_cl=`p4 changes -m 1 "$stream" | sed 's/Change \([0-9]*\) .*/\1/'` 
+
+  echo "$pinned_stream -> @$latest_cl"
+done
